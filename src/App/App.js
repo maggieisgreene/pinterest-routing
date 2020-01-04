@@ -25,7 +25,7 @@ const PrivateRoute = ({ component: Component, authed, ...rest }) => {
 
 class App extends React.Component {
   state = {
-    authed: false,
+    authed: true,
   }
 
   render() {
