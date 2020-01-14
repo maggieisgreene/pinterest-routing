@@ -1,13 +1,27 @@
 import React from 'react';
 
-import './PinForm.scss';
 import pinData from '../../../helpers/data/pinData';
+
+import './PinForm.scss';
 
 class PinForm extends React.Component {
   state = {
     pinName: '',
     pinImage: '',
     pinDescription: '',
+  }
+
+  componentDidMount() {
+    const { pinId } = this.props.match.params;
+
+    if (pinId) {
+      pinData.getSinglePin(pinId)
+        .then((request) => {
+          const pin = request.data;
+          this.setState({ pinName: pin.name, pinImage: pin.imageUrl, pinDescription: pin.description });
+        })
+        .catch((err) => console.error('error from get single pin', err));
+    }
   }
 
   nameChange = (event) => {
@@ -41,8 +55,25 @@ class PinForm extends React.Component {
       .catch((err) => console.error('error from save pin', err));
   }
 
+  updatePinEvent = (event) => {
+    event.preventDefault();
+    const { boardId, pinId } = this.props.match.params;
+
+    const updatedPin = {
+      name: this.state.pinName,
+      imageUrl: this.state.pinImage,
+      siteUrl: this.state.pinImage,
+      description: this.state.pinDescription,
+      boardId,
+    };
+    pinData.updatePin(pinId, updatedPin)
+      .then(() => this.props.history.push(`/board/${boardId}`))
+      .catch((err) => console.error('error from update pin', err));
+  }
+
   render() {
     const { pinName, pinImage, pinDescription } = this.state;
+    const { pinId } = this.props.match.params;
 
     return (
       <form className="PinForm col-6 offset-3">
@@ -79,7 +110,8 @@ class PinForm extends React.Component {
             onChange={this.imageChange}
           />
         </div>
-        <button className="btn btn-light" onClick={this.savePinEvent}>Save Pin</button>
+        { (pinId) ? (<button className="btn btn-light" onClick={this.updatePinEvent}>Update Pin</button>)
+          : (<button className="btn btn-light" onClick={this.savePinEvent}>Save Pin</button>) }
       </form>
     );
   }
