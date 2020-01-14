@@ -30,6 +30,7 @@ class Board extends React.Component {
             <p className="card-text">{board.description}</p>
             <div className="d-flex justify-content-around">
               <Link className="btn btn-light" to={`/board/${board.id}`}>View Pins</Link>
+              <Link className="btn btn-light" to={`/board/${board.id}/edit`}>Edit Board</Link>
               <button className="btn btn-light" onClick={this.deleteBoardEvent}>Delete Board</button>
             </div>
           </div>

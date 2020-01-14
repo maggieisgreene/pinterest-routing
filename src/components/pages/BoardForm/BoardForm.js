@@ -1,14 +1,27 @@
 import React from 'react';
 
-import './BoardForm.scss';
 import authData from '../../../helpers/data/authData';
 import boardData from '../../../helpers/data/boardData';
+
+import './BoardForm.scss';
 
 class BoardForm extends React.Component {
   state = {
     boardName: '',
     boardDescription: '',
     boardImage: '',
+  }
+
+  componentDidMount() {
+    const { boardId } = this.props.match.params;
+
+    if (boardId) {
+      boardData.getSingleBoard(boardId)
+        .then((response) => {
+          this.setState({ boardName: response.data.name, boardDescription: response.data.description, boardImage: response.data.previewImageUrl });
+        })
+        .catch((err) => console.error('error from get single board', err));
+    }
   }
 
   nameChange = (event) => {
@@ -38,10 +51,27 @@ class BoardForm extends React.Component {
     boardData.saveBoard(newBoard)
       .then(() => this.props.history.push('/'))
       .catch((err) => console.error('error from save board', err));
+    this.setState({ boardName: '', boardDescription: '', boardImage: '' });
+  }
+
+  updateBoardEvent = (event) => {
+    event.preventDefault();
+    const { boardId } = this.props.match.params;
+
+    const updatedBoard = {
+      name: this.state.boardName,
+      description: this.state.boardDescription,
+      previewImageUrl: this.state.boardImage,
+      uid: authData.getUid(),
+    };
+    boardData.updateBoard(boardId, updatedBoard)
+      .then(() => this.props.history.push('/'))
+      .catch((err) => console.error('error from update board', err));
   }
 
   render() {
     const { boardName, boardDescription, boardImage } = this.state;
+    const { boardId } = this.props.match.params;
 
     return (
       <form className="BoardForm col-6 offset-3">
@@ -78,7 +108,8 @@ class BoardForm extends React.Component {
             onChange={this.imageChange}
           />
         </div>
-        <button className="btn btn-light" onClick={this.saveBoardEvent}>Save Board</button>
+        { (!boardId) ? (<button className="btn btn-light" onClick={this.saveBoardEvent}>Save Board</button>)
+          : (<button className="btn btn-light" onClick={this.updateBoardEvent}>Update Board</button>) }
       </form>
     );
   }
